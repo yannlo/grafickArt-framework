@@ -5,9 +5,23 @@ namespace Framework;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
-class App
+class App implements RequestHandlerInterface
 {
+    private array $modules;
+
+    private Router $router;
+
+    public function __construct(array $modules = [])
+    {
+        $this->router = new Router();
+
+        foreach ($modules as $module) {
+            $this->modules[] = new $module($this->router);
+        }
+    }
+
     public function run(ServerRequestInterface $request): ResponseInterface
     {
         $uri = $request->getUri()->getPath();
@@ -16,9 +30,27 @@ class App
             ->withStatus(301)
             ->withHeader("Location", substr($uri, 0, -1));
         }
-        if ($uri === "/blog") {
-            return new Response(200, [], "<h1>Bienvenue sur le blog</h1>");
+
+        $route = $this->router->match($request);
+        if (is_null($route)) {
+            return new Response(404, [], "<h1>Error 404</h1>");
         }
-        return new Response(404, [], "<h1>Error 404</h1>");
+
+        $params = $route->getParams();
+
+        $request = array_reduce(array_keys($params), function ($request, $keyParam) use ($params) {
+            return $request -> withAttribute($keyParam, $params[$keyParam]);
+        }, $request);
+        $response = $route -> getMiddleware() -> process($request, $this);
+        if ($response instanceof ResponseInterface) {
+            return $response;
+        }
+
+        throw new \exception("The response is not instance of ResponseInterface");
+    }
+
+    public function handle(ServerRequestInterface $request): ResponseInterface
+    {
+        return new Response();
     }
 }
