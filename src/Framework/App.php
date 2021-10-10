@@ -13,12 +13,16 @@ class App implements RequestHandlerInterface
 
     private Router $router;
 
-    public function __construct(array $modules = [])
+    public function __construct(array $modules = [], array $depndencies = [])
     {
         $this->router = new Router();
 
+        if (array_key_exists("renderer", $depndencies)) {
+            $depndencies["renderer"] -> addGlobal('router', $this->router);
+        }
+
         foreach ($modules as $module) {
-            $this->modules[] = new $module($this->router);
+            $this->modules[] = new $module($this->router, $depndencies["renderer"]);
         }
     }
 
