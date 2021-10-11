@@ -3,7 +3,7 @@
 namespace App\Blog;
 
 use Framework\Router;
-use Framework\Renderer;
+use Framework\Renderer\RendererInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -11,12 +11,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class BlogModule
 {
-    private Renderer $renderer;
+    private RendererInterface $renderer;
     private MiddlewareInterface $index;
     private MiddlewareInterface $show;
 
 
-    public function __construct(Router $router, Renderer $renderer)
+    public function __construct(Router $router, RendererInterface $renderer)
     {
         $this->renderer = $renderer;
         $this->renderer -> addPath(__DIR__ . "/views", "Blog");

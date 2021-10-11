@@ -16,6 +16,7 @@
         "guzzlehttp/psr7": "^2.0",
         "http-interop/response-sender": "^1.0",
         "psr/http-server-middleware": "^1.0",
-        "mezzio/mezzio-fastroute": "^3.2"
+        "mezzio/mezzio-fastroute": "^3.2",
+        "twig/twig": "^3.3"
     }
 }

@@ -3,15 +3,15 @@
 require "../vendor/autoload.php";
 
 use Framework\App;
-use Framework\Renderer;
-
+use Twig\Environment;
 use App\Blog\BlogModule;
 use function Http\Response\send;
+use Twig\Loader\FilesystemLoader;
 use GuzzleHttp\Psr7\ServerRequest;
+use Framework\Renderer\TwigRenderer;
 
-$renderer = new Renderer();
+$renderer = new TwigRenderer(dirname(__DIR__) . "/src/layouts");
 
-$renderer -> addPath(dirname(__DIR__) . "/src/layouts");
 $app = new App([
     BlogModule::class
 ], [
