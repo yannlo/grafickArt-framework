@@ -3,6 +3,7 @@
 namespace Framework;
 
 use GuzzleHttp\Psr7\Response;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -11,18 +12,15 @@ class App implements RequestHandlerInterface
 {
     private array $modules;
 
-    private Router $router;
+    private ContainerInterface $container;
 
-    public function __construct(array $modules = [], array $depndencies = [])
+    public function __construct(ContainerInterface $container, array $modules = [])
     {
-        $this->router = new Router();
 
-        if (array_key_exists("renderer", $depndencies)) {
-            $depndencies["renderer"] -> addGlobal('router', $this->router);
-        }
+        $this->container = $container;
 
         foreach ($modules as $module) {
-            $this->modules[] = new $module($this->router, $depndencies["renderer"]);
+            $this->modules[] = $container -> get($module);
         }
     }
 
@@ -35,7 +33,8 @@ class App implements RequestHandlerInterface
             ->withHeader("Location", substr($uri, 0, -1));
         }
 
-        $route = $this->router->match($request);
+        $router = $this->container->get(Router::class);
+        $route = $router->match($request);
         if (is_null($route)) {
             return new Response(404, [], "<h1>Error 404</h1>");
         }
@@ -45,6 +44,7 @@ class App implements RequestHandlerInterface
         $request = array_reduce(array_keys($params), function ($request, $keyParam) use ($params) {
             return $request -> withAttribute($keyParam, $params[$keyParam]);
         }, $request);
+
         $response = $route -> getMiddleware() -> process($request, $this);
         if ($response instanceof ResponseInterface) {
             return $response;

@@ -2,62 +2,22 @@
 
 namespace App\Blog;
 
+use Framework\Module;
 use Framework\Router;
+use App\Blog\Actions\BlogIndex;
+use App\Blog\Actions\BlogAction;
 use Framework\Renderer\RendererInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
-class BlogModule
+class BlogModule extends Module
 {
-    private RendererInterface $renderer;
-    private MiddlewareInterface $index;
-    private MiddlewareInterface $show;
 
+    public const DEFINITIONS = __DIR__ . '/config.php';
 
-    public function __construct(Router $router, RendererInterface $renderer)
-    {
-        $this->renderer = $renderer;
-        $this->renderer -> addPath(__DIR__ . "/views", "Blog");
-        $this->defineMiddleware();
-        $router->get("/blog", $this -> index, "blog.index");
-        $router->get("/blog/{slug:[a-z\-0-9]+}", $this -> show, "blog.show");
-    }
-
-    private function defineMiddleware(): void
+    public function __construct(Router $router, RendererInterface $renderer, string $prefix)
     {
 
-        $this->index = new class implements MiddlewareInterface{
-
-            public function process(
-                ServerRequestInterface $request,
-                RequestHandlerInterface $handler
-            ): ResponseInterface {
-                $response = $handler->handle($request);
-                $response ->withStatus(200);
-                $content = $this->renderer->render("@Blog/index");
-                $response ->getBody()->write($content);
-                return $response;
-            }
-        };
-
-        $this->show = new class implements MiddlewareInterface{
-
-            public function process(
-                ServerRequestInterface $request,
-                RequestHandlerInterface $handler
-            ): ResponseInterface {
-                $response = $handler->handle($request);
-                $content = $this->renderer->render("@Blog/show", [
-                    "slug" => $request -> getAttribute('slug')
-                ]);
-                $response ->getBody()->write($content);
-                return $response;
-            }
-        };
-
-        $this->index -> renderer = $this ->renderer;
-        $this->show -> renderer = $this ->renderer;
+        $renderer -> addPath(__DIR__ . "/views", "Blog");
+        $router->get($prefix, new BlogAction($renderer), "blog.index");
+        $router->get($prefix . "/{slug:[a-z\-0-9]+}", new BlogAction($renderer), "blog.show");
     }
 }

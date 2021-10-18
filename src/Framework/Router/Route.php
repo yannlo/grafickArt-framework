@@ -2,7 +2,6 @@
 
 namespace Framework\Router;
 
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\MiddlewareInterface;
 
 /**

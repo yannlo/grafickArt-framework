@@ -7,14 +7,9 @@ use Twig\Loader\FilesystemLoader;
 
 class TwigRenderer implements RendererInterface
 {
-    private FilesystemLoader $loader;
-    private Environment $twig; 
 
-    public function __construct(string $path)
+    public function __construct(private FilesystemLoader $loader, private Environment $twig)
     {
-        $this -> loader  = new FilesystemLoader($path);
-        $this -> twig = new Environment($this -> loader,[]);
-
     }
 
 
@@ -30,6 +25,6 @@ class TwigRenderer implements RendererInterface
 
     public function render(string $view, array $params = []): string
     {
-        return $this -> twig -> render ($view.".twig",$params);
+        return $this -> twig -> render($view . ".twig", $params);
     }
 }
