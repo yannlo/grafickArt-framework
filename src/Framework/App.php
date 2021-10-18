@@ -57,4 +57,9 @@ class App implements RequestHandlerInterface
     {
         return new Response();
     }
+
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
+    }
 }

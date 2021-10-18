@@ -1,6 +1,6 @@
 <?php
 
-require "../vendor/autoload.php";
+require dirname(__DIR__) . "/vendor/autoload.php";
 
 use Framework\App;
 use App\Blog\BlogModule;
@@ -32,6 +32,7 @@ $renderer = $container -> get(RendererInterface::class);
 
 $app = new App($container, $modules);
 
-$request  = ServerRequest::fromGlobals();
-
-send($app->run($request));
+if (php_sapi_name() !== 'cli') {
+    $request  = ServerRequest::fromGlobals();
+    send($app->run($request));
+}
